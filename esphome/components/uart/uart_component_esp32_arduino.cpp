@@ -195,6 +195,17 @@ void ESP32ArduinoUARTComponent::flush() {
   this->hw_serial_->flush();
 }
 
+void ESP32ArduinoUARTComponent::flush(bool tx_only) {
+  if (tx_only) { 
+    ESP_LOGVV(TAG, " Flushing RX...");
+    this->hw_serial_->flush();
+  }
+  else {
+    ESP_LOGVV(TAG, " Flushing TX AND RX...");
+    this->hw_serial_->flush(false);
+  }
+}
+
 void ESP32ArduinoUARTComponent::check_logger_conflict() {
 #ifdef USE_LOGGER
   if (this->hw_serial_ == nullptr || logger::global_logger->get_baud_rate() == 0) {

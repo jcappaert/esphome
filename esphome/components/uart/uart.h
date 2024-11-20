@@ -41,6 +41,7 @@ class UARTDevice {
   int available() { return this->parent_->available(); }
 
   void flush() { return this->parent_->flush(); }
+  void flush(bool tx_only) { return this->parent_->flush(tx_only); }
 
   // Compat APIs
   int read() {

@@ -26,6 +26,7 @@ class ESP32ArduinoUARTComponent : public UARTComponent, public Component {
 
   int available() override;
   void flush() override;
+  void flush(bool tx_only) override;
 
   uint32_t get_config();
 
