@@ -19,6 +19,9 @@ climate::ClimateTraits ClimateIR::traits() {
   if (this->supports_fan_only_)
     traits.add_supported_mode(climate::CLIMATE_MODE_FAN_ONLY);
 
+  if (this->humidity_sensor_ != nullptr)
+    traits.set_supports_current_humidity(true);
+
   traits.set_supports_two_point_target_temperature(false);
   traits.set_visual_min_temperature(this->minimum_temperature_);
   traits.set_visual_max_temperature(this->maximum_temperature_);
@@ -56,6 +59,17 @@ void ClimateIR::setup() {
   // Never send nan to HA
   if (std::isnan(this->target_temperature))
     this->target_temperature = 24;
+
+  // register for humidity values and get initial state
+  if (this->humidity_sensor_ != nullptr) {
+    this->humidity_sensor_->add_on_state_callback([this](float state) {
+      this->current_humidity = state;
+      this->publish_state();
+    });
+    this->current_humidity = this->humidity_sensor_->state;
+    ESP_LOGCONFIG(TAG, "Humidity %.1f", this->current_humidity);
+  }  
+  this->publish_state();
 }
 
 void ClimateIR::control(const climate::ClimateCall &call) {
@@ -72,6 +86,7 @@ void ClimateIR::control(const climate::ClimateCall &call) {
   this->transmit_state();
   this->publish_state();
 }
+
 void ClimateIR::dump_config() {
   LOG_CLIMATE("", "IR Climate", this);
   ESP_LOGCONFIG(TAG, "  Min. Temperature: %.1f°C", this->minimum_temperature_);
